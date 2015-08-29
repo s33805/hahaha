@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class YouBikeVO implements Serializable{
 	private int no;
+	private int no2;
 	private String district;
 	private String stationName;
 	private String address;
