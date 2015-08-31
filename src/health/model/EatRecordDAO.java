@@ -14,6 +14,6 @@ public interface EatRecordDAO {
 
 	public abstract EatRecordVO update(EatRecordVO vo);
 
-	public abstract boolean delete(int id);
+	public abstract boolean delete(long no);
 
 }

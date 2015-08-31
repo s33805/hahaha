@@ -11,5 +11,5 @@ public interface ExerciseRecordDAO {
 
 	public abstract ExerciseRecordVO update(ExerciseRecordVO vo);
 
-	public abstract boolean delete(int id);
+	public abstract boolean delete(long no);
 }

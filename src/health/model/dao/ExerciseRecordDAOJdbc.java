@@ -1,8 +1,5 @@
 package health.model.dao;
 
-import health.model.EatRecordDAO;
-import health.model.EatRecordVO;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,16 +8,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EatRecordDAOJdbc implements EatRecordDAO {
+import health.model.ExerciseRecordDAO;
+import health.model.ExerciseRecordVO;
+
+public class ExerciseRecordDAOJdbc implements ExerciseRecordDAO {
 	private static final String URL = "jdbc:sqlserver://localhost:1433;database=bellyworry";
 	private static final String USERNAME = "sa";
 	private static final String PASSWORD = "passw0rd";
 	
-	private static final String SELECT_BY_NO = "select * from eat_Record where No=?";
-
+	private static final String SELECT_BY_NO = "select * from exercise_record where No=?";
+	
 	@Override
-	public EatRecordVO selectByPrimaryKey(long no){
-		EatRecordVO result = null;
+	public ExerciseRecordVO selectByPrimaryKey(long no) {
+		ExerciseRecordVO result = null;
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
@@ -31,13 +31,12 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 			rset = stmt.executeQuery();
 			if(rset.next())
 			{	
-				result = new EatRecordVO();
+				result = new ExerciseRecordVO();
 				result.setNo(rset.getLong(1));
 				result.setMemberNo(rset.getInt(2));
-				result.setDate(rset.getDate(3));
-				result.setTime(rset.getString(4));
-				result.setFoodNo(rset.getInt(5));
-				result.setCount(rset.getInt(6));
+				result.setExerciseNo(rset.getInt(3));
+				result.setDate(rset.getDate(4));
+				result.setCount(rset.getInt(5));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -67,64 +66,11 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 		return result;
 	}
 	
-	private static final String SELECT_BY_MEMBER_NO = "select * from eat_Record where memberNo=?";
+	private static final String SELECT_ALL = "select * from exercise_record";
 
 	@Override
-	public List<EatRecordVO> selectByMemberNo(int memberNo){
-		List<EatRecordVO> result = null;
-		Connection conn = null;
-		PreparedStatement stmt = null;
-		ResultSet rset = null;
-		try {
-			conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-			stmt = conn.prepareStatement(SELECT_BY_MEMBER_NO);
-			stmt.setInt(1, memberNo);
-			rset = stmt.executeQuery();
-			result = new ArrayList<EatRecordVO>();
-			while(rset.next())
-			{	
-				EatRecordVO vo = new EatRecordVO();
-				vo.setNo(rset.getLong(1));
-				vo.setMemberNo(rset.getInt(2));
-				vo.setDate(rset.getDate(3));
-				vo.setTime(rset.getString(4));
-				vo.setFoodNo(rset.getInt(5));
-				vo.setCount(rset.getInt(6));
-				result.add(vo);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally{
-			if (rset!=null) {
-				try {
-					rset.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (stmt!=null) {
-				try {
-					stmt.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-			if (conn!=null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return result;
-	}
-	
-	private static final String SELECT_ALL = "select * from eat_Record";
-
-	@Override
-	public List<EatRecordVO> getAll(){
-		List<EatRecordVO> result = null;
+	public List<ExerciseRecordVO> getAll() {
+		List<ExerciseRecordVO> result = null;
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
@@ -132,16 +78,15 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 			conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
 			stmt = conn.prepareStatement(SELECT_ALL);
 			rset = stmt.executeQuery();
-			result = new ArrayList<EatRecordVO>();
+			result = new ArrayList<ExerciseRecordVO>();
 			while(rset.next())
 			{	
-				EatRecordVO vo = new EatRecordVO();
+				ExerciseRecordVO vo = new ExerciseRecordVO();
 				vo.setNo(rset.getLong(1));
 				vo.setMemberNo(rset.getInt(2));
-				vo.setDate(rset.getDate(3));
-				vo.setTime(rset.getString(4));
-				vo.setFoodNo(rset.getInt(5));
-				vo.setCount(rset.getInt(6));
+				vo.setExerciseNo(rset.getInt(3));
+				vo.setDate(rset.getDate(4));
+				vo.setCount(rset.getInt(5));
 				result.add(vo);
 			}
 		} catch (SQLException e) {
@@ -171,12 +116,13 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 		}
 		return result;
 	}
+	
 	private static final String INSERT =
-			"insert into eat_Record (memberNo, date, time, foodNo, count) values (?, ?, ?, ?, ?)";
+			"insert into exercise_record (memberNo, exerciseNo, date, count) values (?, ?, ?, ?)";
 
 	@Override
-	public EatRecordVO insert(EatRecordVO vo){
-		EatRecordVO result = null;
+	public ExerciseRecordVO insert(ExerciseRecordVO vo) {
+		ExerciseRecordVO result = null;
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
@@ -185,15 +131,14 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 			stmt = conn.prepareStatement(INSERT);
 			if(vo != null){
 				stmt.setInt(1, vo.getMemberNo());
+				stmt.setInt(2, vo.getExerciseNo());
 				if(vo.getDate()==null){
 					long date = vo.getDate().getTime();
-					stmt.setDate(2, new java.sql.Date(date));
+					stmt.setDate(3, new java.sql.Date(date));
 				}else{
-					stmt.setDate(2, null);
+					stmt.setDate(3, null);
 				}
-				stmt.setString(3, vo.getTime());
-				stmt.setInt(4, vo.getFoodNo());
-				stmt.setInt(5, vo.getCount());
+				stmt.setInt(4, vo.getCount());
 				stmt.executeUpdate();
 				rset = stmt.getGeneratedKeys();
 				if(rset.next()){
@@ -229,11 +174,11 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 	}
 	
 	private static final String UPDATE =
-			"update eat_Record set memberNo=?, date=?, time=?, foodNo=?, count=? where No=?";
-
+			"update exercise_record set memberNo=?, exerciseNo=?, date=?, count=? where No=?";
+	
 	@Override
-	public EatRecordVO update(EatRecordVO vo){
-		EatRecordVO result = null;
+	public ExerciseRecordVO update(ExerciseRecordVO vo) {
+		ExerciseRecordVO result = null;
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {
@@ -241,16 +186,14 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 			stmt = conn.prepareStatement(UPDATE);
 			if (vo != null) {
 				stmt.setInt(1, vo.getMemberNo());
+				stmt.setInt(2, vo.getExerciseNo());
 				if (vo.getDate() != null) {
 					long date = vo.getDate().getTime();
-					stmt.setDate(2, new java.sql.Date(date));
+					stmt.setDate(3, new java.sql.Date(date));
 				} else {
-					stmt.setDate(2, null);
+					stmt.setDate(3, null);
 				}
-				stmt.setString(3, vo.getTime());
-				stmt.setInt(4, vo.getFoodNo());
-				stmt.setInt(5, vo.getCount());
-				stmt.setLong(6, vo.getNo());
+				stmt.setInt(4, vo.getCount());
 				int i = stmt.executeUpdate();
 				if (i == 1) {
 					result = this.selectByPrimaryKey(vo.getNo());
@@ -278,10 +221,10 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 	}
 	
 	private static final String DELETE =
-			"delete from eat_Record where no=?";
+			"delete from exercise_record where no=?";
 
 	@Override
-	public boolean delete(long no){
+	public boolean delete(long no) {
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		try {
@@ -312,4 +255,5 @@ public class EatRecordDAOJdbc implements EatRecordDAO {
 		}
 		return false;
 	}
+
 }
